@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { CheckCircle, XCircle, RotateCcw } from "lucide-react";
 
 interface LearningDetailModalProps {
   isOpen: boolean;
@@ -22,29 +22,51 @@ interface LearningDetailModalProps {
 
 export function LearningDetailModal({ isOpen, onClose, title, content }: LearningDetailModalProps) {
   const [selectedAnswers, setSelectedAnswers] = useState<{ [key: number]: number }>({});
+  const [quizSubmitted, setQuizSubmitted] = useState(false);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
   const handleAnswerSelect = (questionIndex: number, answerIndex: number) => {
+    if (quizSubmitted) return;
+    
     setSelectedAnswers(prev => ({
       ...prev,
       [questionIndex]: answerIndex
     }));
   };
 
+  const handleSubmitQuiz = () => {
+    if (Object.keys(selectedAnswers).length === content.quiz.length) {
+      setQuizSubmitted(true);
+    }
+  };
+
+  const handleRetakeQuiz = () => {
+    setSelectedAnswers({});
+    setQuizSubmitted(false);
+    setCurrentQuestionIndex(0);
+  };
+
+  const calculateResults = () => {
+    let correct = 0;
+    content.quiz.forEach((question, index) => {
+      if (selectedAnswers[index] === question.correctAnswer) {
+        correct++;
+      }
+    });
+    return {
+      correct,
+      total: content.quiz.length,
+      percentage: Math.round((correct / content.quiz.length) * 100)
+    };
+  };
+
+  const results = quizSubmitted ? calculateResults() : null;
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle className="text-xl font-bold">{title}</DialogTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-              className="h-6 w-6 rounded-sm opacity-70 hover:opacity-100"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
+          <DialogTitle className="text-xl font-bold">{title}</DialogTitle>
         </DialogHeader>
 
         <Tabs defaultValue="konten" className="flex-1 flex flex-col">
@@ -101,33 +123,114 @@ export function LearningDetailModal({ isOpen, onClose, title, content }: Learnin
 
             <TabsContent value="kuis" className="mt-6">
               <div className="space-y-6">
-                <h3 className="text-lg font-semibold">Kuis {title}</h3>
-                
-                {content.quiz.map((question, questionIndex) => (
-                  <div key={questionIndex} className="space-y-3">
-                    <h4 className="font-medium">{questionIndex + 1}. {question.question}</h4>
-                    
-                    <div className="space-y-2">
-                      {question.options.map((option, optionIndex) => (
-                        <button
-                          key={optionIndex}
-                          onClick={() => handleAnswerSelect(questionIndex, optionIndex)}
-                          className={`w-full text-left p-3 rounded-lg border transition-colors ${
-                            selectedAnswers[questionIndex] === optionIndex
-                              ? 'border-primary bg-primary/10 text-primary'
-                              : 'border-border hover:bg-muted'
-                          }`}
-                        >
-                          {String.fromCharCode(65 + optionIndex)}. {option}
-                        </button>
-                      ))}
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">Kuis {title}</h3>
+                  {quizSubmitted && results && (
+                    <div className="text-sm font-medium">
+                      Nilai: {results.correct}/{results.total} ({results.percentage}%)
                     </div>
+                  )}
+                </div>
+
+                {quizSubmitted && results ? (
+                  // Quiz Results View
+                  <div className="space-y-6">
+                    <div className="bg-muted/50 rounded-lg p-6 text-center">
+                      <div className="text-2xl font-bold mb-2">
+                        {results.percentage >= 70 ? (
+                          <span className="text-green-600">Selamat! 🎉</span>
+                        ) : (
+                          <span className="text-orange-600">Coba Lagi! 💪</span>
+                        )}
+                      </div>
+                      <div className="text-lg mb-4">
+                        Anda menjawab benar {results.correct} dari {results.total} soal ({results.percentage}%)
+                      </div>
+                      <Button onClick={handleRetakeQuiz} className="bg-circuit-blue hover:bg-circuit-blue/90 text-white">
+                        <RotateCcw className="w-4 h-4 mr-2" />
+                        Ulangi Kuis
+                      </Button>
+                    </div>
+
+                    {/* Show all questions with results */}
+                    {content.quiz.map((question, questionIndex) => {
+                      const userAnswer = selectedAnswers[questionIndex];
+                      const isCorrect = userAnswer === question.correctAnswer;
+                      
+                      return (
+                        <div key={questionIndex} className="space-y-3 border rounded-lg p-4">
+                          <div className="flex items-center gap-2">
+                            {isCorrect ? (
+                              <CheckCircle className="w-5 h-5 text-green-600" />
+                            ) : (
+                              <XCircle className="w-5 h-5 text-red-600" />
+                            )}
+                            <h4 className="font-medium">{questionIndex + 1}. {question.question}</h4>
+                          </div>
+                          
+                          <div className="space-y-2 ml-7">
+                            {question.options.map((option, optionIndex) => {
+                              let className = "w-full text-left p-3 rounded-lg border transition-colors ";
+                              
+                              if (optionIndex === question.correctAnswer) {
+                                className += "border-green-500 bg-green-50 text-green-700";
+                              } else if (optionIndex === userAnswer && !isCorrect) {
+                                className += "border-red-500 bg-red-50 text-red-700";
+                              } else {
+                                className += "border-border bg-muted/20";
+                              }
+
+                              return (
+                                <div key={optionIndex} className={className}>
+                                  {String.fromCharCode(65 + optionIndex)}. {option}
+                                  {optionIndex === question.correctAnswer && (
+                                    <span className="ml-2 text-green-600 font-medium">✓ Jawaban Benar</span>
+                                  )}
+                                  {optionIndex === userAnswer && !isCorrect && (
+                                    <span className="ml-2 text-red-600 font-medium">✗ Jawaban Anda</span>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                ))}
-                
-                <Button className="bg-circuit-blue hover:bg-circuit-blue/90 text-white">
-                  Kirim Jawaban
-                </Button>
+                ) : (
+                  // Quiz Taking View
+                  <div className="space-y-6">
+                    {content.quiz.map((question, questionIndex) => (
+                      <div key={questionIndex} className="space-y-3">
+                        <h4 className="font-medium">{questionIndex + 1}. {question.question}</h4>
+                        
+                        <div className="space-y-2">
+                          {question.options.map((option, optionIndex) => (
+                            <button
+                              key={optionIndex}
+                              onClick={() => handleAnswerSelect(questionIndex, optionIndex)}
+                              className={`w-full text-left p-3 rounded-lg border transition-colors ${
+                                selectedAnswers[questionIndex] === optionIndex
+                                  ? 'border-primary bg-primary/10 text-primary'
+                                  : 'border-border hover:bg-muted'
+                              }`}
+                            >
+                              {String.fromCharCode(65 + optionIndex)}. {option}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                    
+                    <Button 
+                      onClick={handleSubmitQuiz}
+                      disabled={Object.keys(selectedAnswers).length !== content.quiz.length}
+                      className="bg-circuit-blue hover:bg-circuit-blue/90 text-white disabled:opacity-50"
+                    >
+                      Kirim Jawaban ({Object.keys(selectedAnswers).length}/{content.quiz.length})
+                    </Button>
+                  </div>
+                )}
               </div>
             </TabsContent>
           </div>
