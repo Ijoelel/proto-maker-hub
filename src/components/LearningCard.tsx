@@ -9,6 +9,7 @@ interface LearningCardProps {
   iconColor: "blue" | "green" | "purple" | "orange";
   buttonText: string;
   onClick?: () => void;
+  onDetailClick?: () => void;
 }
 
 const iconColorClasses = {
@@ -31,7 +32,8 @@ export function LearningCard({
   icon: Icon, 
   iconColor, 
   buttonText, 
-  onClick 
+  onClick,
+  onDetailClick 
 }: LearningCardProps) {
   return (
     <Card className="h-full shadow-card hover:shadow-lg transition-shadow duration-200 bg-gradient-card">
@@ -47,7 +49,7 @@ export function LearningCard({
         </div>
         <Button 
           className={`mt-6 ${buttonColorClasses[iconColor]} px-6 py-2`}
-          onClick={onClick}
+          onClick={onDetailClick || onClick}
         >
           {buttonText}
         </Button>
