@@ -1,10 +1,11 @@
 import {
-  Zap, Wrench, PenSquare, Library, Info, ArrowDown, BatteryCharging, Lightbulb, ToggleLeft, Radio, Waves, HelpCircle, XCircle, Power, RefreshCcw, Book, Wand2
+  Zap, Wrench, PenSquare, Library, Info, ArrowDown, BatteryCharging, Lightbulb, ToggleLeft, Radio, Waves, HelpCircle, XCircle, Power, RefreshCcw, Book, Wand2, ChevronLeft
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { useNavigate } from "react-router";
 
 const components = [
   { name: "Baterai", value: "(5V)", icon: BatteryCharging },
@@ -141,11 +142,26 @@ const Canvas = () => (
 );
 
 export default function Simulation() {
+  const navigate = useNavigate();
+
   return (
     <div className="flex h-screen w-full flex-col bg-[#2A3C5B] overflow-hidden">
-      <header className="flex-shrink-0 bg-[#3B5074] text-white p-3 text-center shadow-md z-10">
-        <h1 className="text-xl font-bold flex items-center justify-center gap-2"><Zap size={24} className="text-yellow-400"/> Simulator Rangkaian Listrik</h1>
-        <p className="text-sm text-gray-300">Arus hanya mengalir ketika rangkaian tertutup dan terminal terhubung dengan benar</p>
+      <header className="flex-shrink-0 bg-[#3B5074] text-white p-3 shadow-md z-10">
+        <div className="relative flex items-center justify-center">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute left-0 text-white hover:bg-white/10"
+            onClick={() => navigate("/")}
+            aria-label="Kembali"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </Button>
+          <div className="text-center space-y-1">
+            <h1 className="text-xl font-bold flex items-center justify-center gap-2"><Zap size={24} className="text-yellow-400"/> Simulator Rangkaian Listrik</h1>
+            <p className="text-sm text-gray-300">Arus hanya mengalir ketika rangkaian tertutup dan terminal terhubung dengan benar</p>
+          </div>
+        </div>
       </header>
       <main className="flex flex-1 overflow-hidden">
         <ComponentSidebar />
