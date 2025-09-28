@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import {
     BookOpen,
@@ -10,6 +10,7 @@ import {
     LogOut,
     Menu,
     CircuitBoard,
+    ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,6 +21,7 @@ import {
     SheetTitle,
     SheetDescription,
 } from "@/components/ui/sheet";
+import { learningMaterials } from "@/lib/learning-materials";
 
 const navigation = [
     { name: "CircuMa", path: "/", icon: BookOpen },
@@ -32,6 +34,7 @@ interface MobileSidebarProps {
 
 export function MobileSidebar({ children }: MobileSidebarProps) {
     const [open, setOpen] = useState(false);
+    const [circuMaOpen, setCircuMaOpen] = useState(false);
     const location = useLocation();
     const navigate = useNavigate();
     const hideSidebarRoutes = ["/simulation"];
@@ -39,6 +42,43 @@ export function MobileSidebar({ children }: MobileSidebarProps) {
     const contentClasses = `w-full ${
         showSidebar ? "md:ml-64 md:w-[calc(100%-16rem)]" : ""
     }`;
+
+    const circuMaActive =
+        location.pathname === "/" || location.pathname.startsWith("/materials");
+    const activeMaterialSlug = location.pathname.startsWith("/materials/")
+        ? location.pathname.split("/")[2]
+        : undefined;
+
+    useEffect(() => {
+        setCircuMaOpen(circuMaActive);
+    }, [circuMaActive]);
+
+    const handleNavigate = (path: string, shouldCloseSheet = false) => {
+        navigate(path);
+        if (shouldCloseSheet) {
+            setOpen(false);
+        }
+    };
+
+    const renderMaterialLinks = (onNavigate: (path: string) => void) => (
+        <div className="mt-2 space-y-1 pl-11">
+            {learningMaterials.map((material) => {
+                const isActive = activeMaterialSlug === material.slug;
+                return (
+                    <button
+                        key={material.slug}
+                        type="button"
+                        onClick={() => onNavigate(`/materials/${material.slug}`)}
+                        className={`w-full text-left text-sm px-3 py-2 rounded-lg transition-colors text-white/80 hover:bg-white/10 ${
+                            isActive ? "bg-white/20 text-white" : ""
+                        }`}
+                    >
+                        {material.title}
+                    </button>
+                );
+            })}
+        </div>
+    );
 
     return (
         <>
@@ -73,27 +113,55 @@ export function MobileSidebar({ children }: MobileSidebarProps) {
 
                                         {/* Navigation */}
                                         <nav className="flex-1 px-4 py-6 space-y-2">
-                                            {navigation.map((item) => {
-                                                const isActive = location.pathname === item.path;
-                                                return (
-                                                    <button
-                                                        key={item.name}
-                                                        type="button"
-                                                        onClick={() => {
-                                                            navigate(item.path);
-                                                            setOpen(false);
+                                            <div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleNavigate("/", true)}
+                                                    className={`flex w-full items-center px-4 py-3 rounded-lg text-white/90 hover:bg-white/10 transition-colors ${
+                                                        circuMaActive
+                                                            ? "bg-white/20 text-white font-medium"
+                                                            : ""
+                                                    }`}
+                                                >
+                                                    <BookOpen className="w-5 h-5 mr-3" />
+                                                    CircuMa
+                                                    <span
+                                                        className="ml-auto"
+                                                        onClick={(event) => {
+                                                            event.stopPropagation();
+                                                            setCircuMaOpen((prev) => !prev);
                                                         }}
-                                                        className={`flex w-full items-center px-4 py-3 rounded-lg text-white/90 hover:bg-white/10 transition-colors ${
-                                                            isActive
-                                                                ? "bg-white/20 text-white font-medium"
-                                                                : ""
-                                                        }`}
                                                     >
-                                                        <item.icon className="w-5 h-5 mr-3" />
-                                                        {item.name}
-                                                    </button>
-                                                );
-                                            })}
+                                                        <ChevronDown
+                                                            className={`h-4 w-4 transition-transform ${
+                                                                circuMaOpen ? "rotate-180" : ""
+                                                            }`}
+                                                        />
+                                                    </span>
+                                                </button>
+                                                {circuMaOpen && renderMaterialLinks((path) => handleNavigate(path, true))}
+                                            </div>
+
+                                            {navigation
+                                                .filter((item) => item.name !== "CircuMa")
+                                                .map((item) => {
+                                                    const isActive = location.pathname === item.path;
+                                                    return (
+                                                        <button
+                                                            key={item.name}
+                                                            type="button"
+                                                            onClick={() => handleNavigate(item.path, true)}
+                                                            className={`flex w-full items-center px-4 py-3 rounded-lg text-white/90 hover:bg-white/10 transition-colors ${
+                                                                isActive
+                                                                    ? "bg-white/20 text-white font-medium"
+                                                                    : ""
+                                                            }`}
+                                                        >
+                                                            <item.icon className="w-5 h-5 mr-3" />
+                                                            {item.name}
+                                                        </button>
+                                                    );
+                                                })}
                                         </nav>
 
                                         {/* Footer */}
@@ -147,24 +215,51 @@ export function MobileSidebar({ children }: MobileSidebarProps) {
 
                             {/* Navigation */}
                             <nav className="flex-1 px-4 py-6 space-y-2">
-                                {navigation.map((item) => {
-                                    const isActive = location.pathname === item.path;
-                                    return (
-                                        <button
-                                            key={item.name}
-                                            type="button"
-                                            onClick={() => navigate(item.path)}
-                                            className={`flex w-full items-center px-4 py-3 rounded-lg text-white/90 hover:bg-white/10 transition-colors ${
-                                                isActive
-                                                    ? "bg-white/20 text-white font-medium"
-                                                    : ""
-                                            }`}
+                                <div>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleNavigate("/")}
+                                        className={`flex w-full items-center px-4 py-3 rounded-lg text-white/90 hover:bg-white/10 transition-colors ${
+                                            circuMaActive ? "bg-white/20 text-white font-medium" : ""
+                                        }`}
+                                    >
+                                        <BookOpen className="w-5 h-5 mr-3" />
+                                        CircuMa
+                                        <span
+                                            className="ml-auto"
+                                            onClick={(event) => {
+                                                event.stopPropagation();
+                                                setCircuMaOpen((prev) => !prev);
+                                            }}
                                         >
-                                            <item.icon className="w-5 h-5 mr-3" />
-                                            {item.name}
-                                        </button>
-                                    );
-                                })}
+                                            <ChevronDown
+                                                className={`h-4 w-4 transition-transform ${
+                                                    circuMaOpen ? "rotate-180" : ""
+                                                }`}
+                                            />
+                                        </span>
+                                    </button>
+                                    {circuMaOpen && renderMaterialLinks((path) => handleNavigate(path))}
+                                </div>
+
+                                {navigation
+                                    .filter((item) => item.name !== "CircuMa")
+                                    .map((item) => {
+                                        const isActive = location.pathname === item.path;
+                                        return (
+                                            <button
+                                                key={item.name}
+                                                type="button"
+                                                onClick={() => handleNavigate(item.path)}
+                                                className={`flex w-full items-center px-4 py-3 rounded-lg text-white/90 hover:bg-white/10 transition-colors ${
+                                                    isActive ? "bg-white/20 text-white font-medium" : ""
+                                                }`}
+                                            >
+                                                <item.icon className="w-5 h-5 mr-3" />
+                                                {item.name}
+                                            </button>
+                                        );
+                                    })}
                             </nav>
 
                             {/* Footer */}
