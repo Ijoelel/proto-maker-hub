@@ -1,4 +1,4 @@
-import { NavLink } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import {
     BookOpen,
     FlaskConical,
@@ -17,6 +17,9 @@ const navigation = [
 ];
 
 export function Sidebar() {
+    const location = useLocation();
+    const navigate = useNavigate();
+
     return (
         <div className="fixed left-0 top-0 h-screen w-64 bg-gradient-sidebar shadow-sidebar flex flex-col">
             {/* Header */}
@@ -29,22 +32,22 @@ export function Sidebar() {
 
             {/* Navigation */}
             <nav className="flex-1 px-4 py-6 space-y-2">
-                {navigation.map((item) => (
-                    <NavLink
-                        key={item.name}
-                        to={item.path}
-                        className={({ isActive }) =>
-                            `flex items-center px-4 py-3 rounded-lg text-white/90 hover:bg-white/10 transition-colors ${
-                                isActive
-                                    ? "bg-white/20 text-white font-medium"
-                                    : ""
-                            }`
-                        }
-                    >
-                        <item.icon className="w-5 h-5 mr-3" />
-                        {item.name}
-                    </NavLink>
-                ))}
+                {navigation.map((item) => {
+                    const isActive = location.pathname === item.path;
+                    return (
+                        <button
+                            key={item.name}
+                            type="button"
+                            onClick={() => navigate(item.path)}
+                            className={`flex w-full items-center px-4 py-3 rounded-lg text-white/90 hover:bg-white/10 transition-colors ${
+                                isActive ? "bg-white/20 text-white font-medium" : ""
+                            }`}
+                        >
+                            <item.icon className="w-5 h-5 mr-3" />
+                            {item.name}
+                        </button>
+                    );
+                })}
             </nav>
 
             {/* Footer */}
