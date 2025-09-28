@@ -17,8 +17,11 @@ import {
   Book,
   Wand2,
   ChevronLeft,
-  X,
+  Plus,
+  GitBranch,
+  BookOpen,
 } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -33,6 +36,14 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 
 const components = [
@@ -88,14 +99,6 @@ const ComponentPanelContent = () => (
       </div>
     </div>
   </>
-);
-
-const ComponentSidebar = ({ className }: { className?: string }) => (
-  <aside className={cn("w-64 bg-[#3B5074] text-white flex flex-col", className)}>
-    <ScrollArea className="flex-1">
-      <ComponentPanelContent />
-    </ScrollArea>
-  </aside>
 );
 
 const AnalysisPanelContent = () => (
@@ -178,14 +181,6 @@ const AnalysisPanelContent = () => (
   </div>
 );
 
-const AnalysisSidebar = ({ className }: { className?: string }) => (
-  <aside className={cn("w-72 bg-[#3B5074] text-white flex flex-col", className)}>
-    <ScrollArea className="flex-1">
-      <AnalysisPanelContent />
-    </ScrollArea>
-  </aside>
-);
-
 const Canvas = () => (
   <section className="flex-1 flex flex-col bg-[#2A3C5B] p-4">
     <h2 className="text-lg font-semibold flex items-center gap-2 text-white mb-4"><PenSquare size={20} /> Pembuat Rangkaian</h2>
@@ -206,9 +201,11 @@ const Canvas = () => (
 
 export default function Simulation() {
   const navigate = useNavigate();
+  const [isWiringMode, setIsWiringMode] = useState(false);
+  const [analysisOpen, setAnalysisOpen] = useState(false);
 
   return (
-    <div className="flex h-screen w-full flex-col bg-[#2A3C5B] overflow-hidden">
+    <div className="relative flex h-screen w-full flex-col bg-[#2A3C5B] overflow-hidden">
       <header className="flex-shrink-0 bg-[#3B5074] text-white p-3 shadow-md z-10">
         <div className="relative flex items-center justify-center">
           <Button
@@ -220,14 +217,62 @@ export default function Simulation() {
           >
             <ChevronLeft className="h-5 w-5" />
           </Button>
-          <div className="absolute right-0 flex items-center gap-2 md:hidden">
+          <div className="text-center space-y-1">
+            <h1 className="text-xl font-bold flex items-center justify-center gap-2"><Zap size={24} className="text-yellow-400"/> Simulator Rangkaian Listrik</h1>
+            <p className="text-sm text-gray-300">Arus hanya mengalir ketika rangkaian tertutup dan terminal terhubung dengan benar</p>
+          </div>
+        </div>
+      </header>
+      <main className="flex flex-1 overflow-hidden">
+        <Canvas />
+      </main>
+      <div className="pointer-events-none absolute inset-0 flex flex-col">
+        <div className="relative flex-1">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button
+                variant="ghost"
+                className="pointer-events-auto fixed top-6 left-6 h-14 w-14 rounded-full bg-white/15 text-white shadow-lg backdrop-blur transition hover:bg-white/25"
+              >
+                <BookOpen className="h-6 w-6" />
+                <span className="sr-only">Buka tutorial</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="bg-[#3B5074] text-white sm:max-w-md">
+              <SheetHeader className="text-left">
+                <SheetTitle className="text-white">Panduan Cepat</SheetTitle>
+                <SheetDescription className="text-gray-200">
+                  Pelajari cara menggunakan simulator sebelum memulai.
+                </SheetDescription>
+              </SheetHeader>
+              <div className="mt-6 space-y-4 text-sm text-gray-200">
+                <p>
+                  Gunakan tombol <strong>+</strong> untuk menambahkan komponen ke workspace. Aktifkan mode kabel
+                  untuk menghubungkan terminal antar komponen, lalu buka panel analisis untuk melihat status
+                  rangkaian Anda.
+                </p>
+                <div className="rounded-lg bg-[#2A3C5B] p-4">
+                  <h3 className="mb-2 flex items-center gap-2 text-base font-semibold text-yellow-400">
+                    <Info className="h-4 w-4" /> Langkah-langkah cepat
+                  </h3>
+                  <ol className="list-decimal list-inside space-y-1 text-xs text-gray-300">
+                    <li>Tambahkan komponen yang Anda butuhkan.</li>
+                    <li>Aktifkan mode kabel lalu klik terminal yang ingin disambungkan.</li>
+                    <li>Buka panel analisis untuk mengecek hasil rangkaian.</li>
+                  </ol>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+          <div className="pointer-events-auto fixed bottom-6 right-6 flex flex-col items-end gap-4">
             <Drawer>
               <DrawerTrigger asChild>
                 <Button
-                  size="sm"
-                  className="bg-white/10 text-white hover:bg-white/20"
+                  className="flex h-16 w-16 items-center justify-center rounded-full bg-[#1E90FF] text-white shadow-xl transition hover:bg-[#1C86EE]"
+                  size="icon"
                 >
-                  <Wrench className="mr-2 h-4 w-4" /> Komponen
+                  <Plus className="h-6 w-6" />
+                  <span className="sr-only">Tambah komponen</span>
                 </Button>
               </DrawerTrigger>
               <DrawerContent className="bg-[#3B5074] text-white border-none">
@@ -235,12 +280,13 @@ export default function Simulation() {
                   <div>
                     <DrawerTitle className="text-white">Daftar Komponen</DrawerTitle>
                     <DrawerDescription className="text-gray-200">
-                      Pilih komponen untuk ditambahkan ke workspace
+                      Pilih komponen untuk ditambahkan ke workspace.
                     </DrawerDescription>
                   </div>
                   <DrawerClose asChild>
                     <Button variant="ghost" size="icon" className="text-white hover:bg-white/10">
-                      <X className="h-4 w-4" />
+                      <XCircle className="h-5 w-5" />
+                      <span className="sr-only">Tutup daftar komponen</span>
                     </Button>
                   </DrawerClose>
                 </DrawerHeader>
@@ -249,46 +295,53 @@ export default function Simulation() {
                 </ScrollArea>
               </DrawerContent>
             </Drawer>
-            <Drawer>
-              <DrawerTrigger asChild>
+            <Button
+              onClick={() => setIsWiringMode((prev) => !prev)}
+              className={cn(
+                "flex h-16 w-16 items-center justify-center rounded-full border border-white/20 text-white shadow-lg transition",
+                isWiringMode ? "bg-yellow-500 text-black hover:bg-yellow-400" : "bg-white/15 hover:bg-white/25",
+              )}
+              size="icon"
+            >
+              <GitBranch className="h-6 w-6" />
+              <span className="sr-only">Aktifkan mode kabel</span>
+            </Button>
+            <Sheet open={analysisOpen} onOpenChange={setAnalysisOpen}>
+              <SheetTrigger asChild>
                 <Button
-                  size="sm"
-                  className="bg-white/10 text-white hover:bg-white/20"
+                  variant="ghost"
+                  className="flex h-16 w-16 items-center justify-center rounded-full bg-white/15 text-white shadow-lg transition hover:bg-white/25"
+                  size="icon"
                 >
-                  <Library className="mr-2 h-4 w-4" /> Analisis
+                  <Library className="h-6 w-6" />
+                  <span className="sr-only">Buka analisis rangkaian</span>
                 </Button>
-              </DrawerTrigger>
-              <DrawerContent className="bg-[#3B5074] text-white border-none">
-                <DrawerHeader className="flex items-center justify-between p-4 text-left">
-                  <div>
-                    <DrawerTitle className="text-white">Analisis Rangkaian</DrawerTitle>
-                    <DrawerDescription className="text-gray-200">
-                      Lihat status rangkaian dan komponen
-                    </DrawerDescription>
-                  </div>
-                  <DrawerClose asChild>
-                    <Button variant="ghost" size="icon" className="text-white hover:bg-white/10">
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </DrawerClose>
-                </DrawerHeader>
-                <ScrollArea className="max-h-[60vh] pb-6">
+              </SheetTrigger>
+              <SheetContent side="right" className="bg-[#3B5074] text-white sm:max-w-md">
+                <SheetHeader className="text-left">
+                  <SheetTitle className="text-white">Analisis Rangkaian</SheetTitle>
+                  <SheetDescription className="text-gray-200">
+                    Tinjau status koneksi dan komponen rangkaian Anda.
+                  </SheetDescription>
+                </SheetHeader>
+                <ScrollArea className="mt-6 h-[70vh] pr-4">
                   <AnalysisPanelContent />
                 </ScrollArea>
-              </DrawerContent>
-            </Drawer>
-          </div>
-          <div className="text-center space-y-1">
-            <h1 className="text-xl font-bold flex items-center justify-center gap-2"><Zap size={24} className="text-yellow-400"/> Simulator Rangkaian Listrik</h1>
-            <p className="text-sm text-gray-300">Arus hanya mengalir ketika rangkaian tertutup dan terminal terhubung dengan benar</p>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
-      </header>
-      <main className="flex flex-1 overflow-hidden">
-        <ComponentSidebar className="hidden md:flex" />
-        <Canvas />
-        <AnalysisSidebar className="hidden md:flex" />
-      </main>
+      </div>
+      <div
+        className="pointer-events-none absolute left-1/2 top-[88px] z-10 -translate-x-1/2"
+        aria-live="polite"
+      >
+        {isWiringMode && (
+          <div className="rounded-full bg-yellow-500 px-4 py-2 text-sm font-semibold text-black shadow-lg">
+            Mode kabel aktif
+          </div>
+        )}
+      </div>
     </div>
   );
 }
