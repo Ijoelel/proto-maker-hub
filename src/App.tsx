@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router";
 import { MobileSidebar } from "@/components/MobileSidebar";
 import CircuMa from "./pages/CircuMa";
 import CircuLabs from "./pages/CircuLabs";
+import LearningMaterialDetail from "./pages/LearningMaterialDetail";
 import Simulation from "./pages/Simulation";
 import NotFound from "./pages/NotFound";
 
@@ -22,6 +23,7 @@ const App = () => (
                         <Routes>
                             <Route path="/" element={<CircuMa />} />
                             <Route path="/circulabs" element={<CircuLabs />} />
+                            <Route path="/materials/:slug" element={<LearningMaterialDetail />} />
                             <Route
                                 path="/simulation"
                                 element={<Simulation />}
