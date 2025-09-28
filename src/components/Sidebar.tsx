@@ -6,7 +6,8 @@ import {
   HelpCircle, 
   FileText,
   User,
-  LogOut
+  LogOut,
+  CircuitBoard
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -16,6 +17,7 @@ const navigation = [
   { name: "CircuLabs", path: "/circulabs", icon: AlertTriangle },
   { name: "CirQuiz", path: "/cirquiz", icon: HelpCircle },
   { name: "CircuRef", path: "/circuref", icon: FileText },
+  { name: "Simulation", path: "/simulation", icon: CircuitBoard },
 ];
 
 export function Sidebar() {

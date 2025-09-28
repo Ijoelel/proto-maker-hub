@@ -8,10 +8,11 @@ import {
   FileText,
   User,
   LogOut,
-  Menu
+  Menu,
+  CircuitBoard
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 
 const navigation = [
   { name: "CircuMa", path: "/", icon: BookOpen },
@@ -19,6 +20,7 @@ const navigation = [
   { name: "CircuLabs", path: "/circulabs", icon: AlertTriangle },
   { name: "CirQuiz", path: "/cirquiz", icon: HelpCircle },
   { name: "CircuRef", path: "/circuref", icon: FileText },
+  { name: "Simulation", path: "/simulation", icon: CircuitBoard },
 ];
 
 interface MobileSidebarProps {
@@ -45,11 +47,12 @@ export function MobileSidebar({ children }: MobileSidebarProps) {
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="p-0 bg-gradient-sidebar border-r border-white/10 w-64">
-                {/* Header */}
-                <div className="p-6 border-b border-white/10">
-                  <h1 className="text-white text-xl font-bold">CircuitPintar</h1>
-                  <p className="text-white/80 text-sm mt-1">Media Pembelajaran Interaktif</p>
-                </div>
+                <SheetHeader className="p-6 border-b border-white/10 text-left">
+                  <SheetTitle className="text-white text-xl font-bold">CircuitPintar</SheetTitle>
+                  <SheetDescription className="text-white/80 text-sm">
+                    Media Pembelajaran Interaktif
+                  </SheetDescription>
+                </SheetHeader>
 
                 {/* Navigation */}
                 <nav className="flex-1 px-4 py-6 space-y-2">

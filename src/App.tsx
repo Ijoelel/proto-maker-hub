@@ -9,6 +9,7 @@ import CircuLabs from "./pages/CircuLabs";
 import CircuJobs from "./pages/CircuJobs"; 
 import CirQuiz from "./pages/CirQuiz";
 import CircuRef from "./pages/CircuRef";
+import Simulation from "./pages/Simulation";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ const App = () => (
               <Route path="/circujobs" element={<CircuJobs />} />
               <Route path="/cirquiz" element={<CirQuiz />} />
               <Route path="/circuref" element={<CircuRef />} />
+              <Route path="/simulation" element={<Simulation />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

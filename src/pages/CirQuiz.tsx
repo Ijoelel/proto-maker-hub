@@ -40,7 +40,7 @@ export default function CirQuiz() {
   };
 
   return (
-    <div className="ml-64 min-h-screen bg-background">
+    <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="bg-white border-b border-border px-8 py-6">
         <div className="flex items-center justify-between">
