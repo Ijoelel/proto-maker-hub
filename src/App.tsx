@@ -23,7 +23,10 @@ const App = () => (
                         <Routes>
                             <Route path="/" element={<CircuMa />} />
                             <Route path="/circulabs" element={<CircuLabs />} />
-                            <Route path="/materials/:slug" element={<LearningMaterialDetail />} />
+                            <Route
+                                path="/materials/:slug"
+                                element={<LearningMaterialDetail />}
+                            />
                             <Route
                                 path="/simulation"
                                 element={<Simulation />}
